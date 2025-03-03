@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Learn Text Modifiers</string>
+    <string name="hello_string">Hello world from strings</string>
+</resources>
