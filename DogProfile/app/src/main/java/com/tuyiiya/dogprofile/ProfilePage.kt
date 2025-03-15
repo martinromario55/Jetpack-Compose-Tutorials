@@ -1,8 +1,10 @@
 package com.tuyiiya.dogprofile
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -43,85 +46,161 @@ fun ProfilePage() {
             )
             .border(width = 2.dp, color = Color.Gray, shape = RoundedCornerShape(30.dp))
     ) {
-        // Content of our Card - Including Dog Image, Description, followers, etc.
-        ConstraintLayout {
-            val (
-                image,
-                nameText,
-                countryText,
-                rowStats,
-                buttonFollow,
-                buttonMessage
-            ) = createRefs()
-
-            val guideLine = createGuidelineFromTop(0.1f)
-
-
-            Image(painter = painterResource(id = R.drawable.husky)
-                , contentDescription = "husky",
-                modifier = Modifier.size(200.dp)
-                    .clip(CircleShape)
-                    .border(
-                        width = 2.dp,
-                        color = Color.Red,
-                        shape = CircleShape
-                    ).constrainAs(image) {
-                        //top.linkTo(parent.top)
-                        top.linkTo(guideLine)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    },
-                contentScale = ContentScale.Crop
-            )
-
-            Text(text = "Siberian Husky",
-                modifier = Modifier.constrainAs(nameText) {
-                    top.linkTo(image.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                }
-            )
-            Text(text = "Germany",
-                modifier = Modifier.constrainAs(countryText) {
-                    top.linkTo(nameText.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                }
-            )
-
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.fillMaxWidth().padding(16.dp).constrainAs(rowStats) {
-                    top.linkTo(countryText.bottom)
-                }
-            ) {
-                ProfileStats("830", "Followers")
-                ProfileStats("120", "Following")
-                ProfileStats("330", "Posts")
+        BoxWithConstraints {
+            val constraints = if (this@BoxWithConstraints.minWidth < 600.dp) {
+                potraitConstraints(margin = 16.dp)
+            } else {
+                landscapeConstraints(margin = 16.dp)
             }
 
-            Button(
-                onClick = {},
-                modifier = Modifier.constrainAs(buttonFollow) {
-                    top.linkTo(rowStats.bottom, margin = 16.dp)
-                    start.linkTo(parent.start)
-                    end.linkTo(buttonMessage.start)
-                    width = Dimension.wrapContent
+            // Content of our Card - Including Dog Image, Description, followers, etc.
+            ConstraintLayout(constraints) {
+
+                Image(
+                    painter = painterResource(id = R.drawable.husky), contentDescription = "husky",
+                    modifier = Modifier.size(200.dp)
+                        .clip(CircleShape)
+                        .border(
+                            width = 2.dp,
+                            color = Color.Red,
+                            shape = CircleShape
+                        )
+                        .layoutId("image"),
+                    contentScale = ContentScale.Crop
+                )
+
+                Text(
+                    text = "Siberian Husky",
+                    modifier = Modifier.layoutId("nameText")
+                )
+                Text(
+                    text = "Germany",
+                    modifier = Modifier.layoutId("countryText")
+                )
+
+                Row(
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    modifier = Modifier.fillMaxWidth().padding(16.dp).layoutId("rowStats"),
+                ) {
+                    ProfileStats("830", "Followers")
+                    ProfileStats("120", "Following")
+                    ProfileStats("330", "Posts")
                 }
-            ) {
-                Text(text = "Follow User")
-            }
-            Button(
-                onClick = {},
-                modifier = Modifier.constrainAs(buttonMessage) {
-                    top.linkTo(rowStats.bottom, margin = 16.dp)
-                    start.linkTo(buttonFollow.end)
-                    end.linkTo(parent.end)
-                    width = Dimension.wrapContent
+
+                Button(
+                    onClick = {},
+                    modifier = Modifier.layoutId("buttonFollow")
+                ) {
+                    Text(text = "Follow User")
                 }
-            ) {
-                Text(text = "Direct Message")
+                Button(
+                    onClick = {},
+                    modifier = Modifier.layoutId("buttonMessage")
+                ) {
+                    Text(text = "Direct Message")
+                }
             }
+        }
+    }
+}
+
+private fun potraitConstraints(margin: Dp): ConstraintSet {
+    return ConstraintSet {
+        val image = createRefFor("image")
+        val nameText = createRefFor("nameText")
+        val countryText = createRefFor("countryText")
+        val rowStats = createRefFor("rowStats")
+        val buttonFollow = createRefFor("buttonFollow")
+        val buttonMessage = createRefFor("buttonMessage")
+        val guideLine = createGuidelineFromTop(0.1f)
+
+        constrain(image) {
+            top.linkTo(guideLine)
+            start.linkTo(parent.start)
+            end.linkTo(parent.end)
+        }
+
+        constrain(nameText) {
+            top.linkTo(image.bottom)
+            start.linkTo(parent.start)
+            end.linkTo(parent.end)
+        }
+
+        constrain(countryText) {
+            top.linkTo(nameText.bottom)
+            start.linkTo(parent.start)
+            end.linkTo(parent.end)
+        }
+
+        constrain(rowStats) {
+            top.linkTo(countryText.bottom)
+        }
+
+        constrain(buttonFollow) {
+            top.linkTo(rowStats.bottom, margin = margin)
+            start.linkTo(parent.start)
+            end.linkTo(buttonMessage.start)
+            width = Dimension.wrapContent
+        }
+
+        constrain(buttonMessage) {
+            top.linkTo(rowStats.bottom, margin = margin)
+            start.linkTo(buttonFollow.end)
+            end.linkTo(parent.end)
+            width = Dimension.wrapContent
+        }
+    }
+}
+
+private fun landscapeConstraints(margin: Dp): ConstraintSet {
+    return ConstraintSet {
+        val image = createRefFor("image")
+        val nameText = createRefFor("nameText")
+        val countryText = createRefFor("countryText")
+        val rowStats = createRefFor("rowStats")
+        val buttonFollow = createRefFor("buttonFollow")
+        val buttonMessage = createRefFor("buttonMessage")
+        val guideLine = createGuidelineFromTop(0.3f)
+
+        constrain(image) {
+            top.linkTo(guideLine, margin = margin)
+            start.linkTo(parent.start, margin = margin)
+//            end.linkTo(rowStats.start, margin = margin)
+        }
+
+        constrain(nameText) {
+            top.linkTo(image.bottom)
+            start.linkTo(image.start)
+            //end.linkTo(parent.end)
+        }
+
+        constrain(countryText) {
+            top.linkTo(nameText.bottom)
+            start.linkTo(nameText.start)
+            end.linkTo(nameText.end)
+        }
+
+        constrain(rowStats) {
+            top.linkTo(image.top)
+            start.linkTo(image.end, margin = margin)
+            end.linkTo(parent.end)
+            width = Dimension.fillToConstraints
+        }
+
+        constrain(buttonFollow) {
+            top.linkTo(rowStats.bottom, margin = 16.dp)
+            start.linkTo(rowStats.start)
+            end.linkTo(buttonMessage.start)
+            bottom.linkTo(countryText.bottom)
+            width = Dimension.wrapContent
+        }
+
+        constrain(buttonMessage) {
+            top.linkTo(rowStats.bottom, margin = 16.dp)
+            start.linkTo(buttonFollow.end)
+            end.linkTo(parent.end)
+            bottom.linkTo(countryText.bottom)
+            width = Dimension.wrapContent
         }
     }
 }
