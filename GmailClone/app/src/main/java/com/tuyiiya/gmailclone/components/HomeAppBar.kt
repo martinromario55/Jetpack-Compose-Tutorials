@@ -12,11 +12,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,9 +31,15 @@ import androidx.compose.ui.unit.dp
 import com.tuyiiya.gmailclone.GmailApp
 import com.tuyiiya.gmailclone.R
 import com.tuyiiya.gmailclone.ui.theme.GmailCloneTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
-fun HomeAppBar() {
+fun HomeAppBar(
+    drawerState: DrawerState,
+    scope: CoroutineScope
+) {
+
     Box(
         modifier = Modifier.padding(10.dp)
     ) {
@@ -42,7 +52,13 @@ fun HomeAppBar() {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxSize().padding(8.dp)
             ) {
-                Icon(Icons.Default.Menu, "Menu")
+                IconButton(
+                    onClick = {
+                        scope.launch { drawerState.open() }
+                    }
+                ) {
+                    Icon(Icons.Default.Menu, "Menu")
+                }
                 Text(
                     text = "Search in emails",
                     modifier = Modifier.weight(2.0f)

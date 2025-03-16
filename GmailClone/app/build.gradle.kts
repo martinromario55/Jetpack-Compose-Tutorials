@@ -56,4 +56,9 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    // Material Icons Core
+    implementation(libs.androidx.material.icons.core)
+
+    // Material Icons Extended (for Outlined, Rounded, Two-Tone, and Sharp)
+    implementation(libs.androidx.material.icons.extended.v152)
 }
