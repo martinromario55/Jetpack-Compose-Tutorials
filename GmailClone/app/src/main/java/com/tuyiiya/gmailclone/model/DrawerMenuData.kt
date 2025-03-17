@@ -1,7 +1,22 @@
-package com.tuyiiya.gmailclone
+package com.tuyiiya.gmailclone.model
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.outlined.AllInbox
+import androidx.compose.material.icons.outlined.CalendarToday
+import androidx.compose.material.icons.outlined.Contacts
+import androidx.compose.material.icons.outlined.Drafts
+import androidx.compose.material.icons.outlined.Help
+import androidx.compose.material.icons.outlined.Inbox
+import androidx.compose.material.icons.outlined.Label
+import androidx.compose.material.icons.outlined.Mail
+import androidx.compose.material.icons.outlined.Outbox
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Schedule
+import androidx.compose.material.icons.outlined.Send
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Snooze
+import androidx.compose.material.icons.outlined.StarOutline
+import androidx.compose.material.icons.outlined.Tag
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class DrawerMenuData(

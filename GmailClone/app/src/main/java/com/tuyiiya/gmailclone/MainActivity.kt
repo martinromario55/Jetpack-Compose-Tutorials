@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.tuyiiya.gmailclone.components.GmailDrawerMenu
 import com.tuyiiya.gmailclone.components.HomeAppBar
+import com.tuyiiya.gmailclone.components.HomeBottomMenu
 import com.tuyiiya.gmailclone.ui.theme.GmailCloneTheme
 
 class MainActivity : ComponentActivity() {
@@ -58,7 +59,10 @@ fun GmailApp() {
             topBar = { HomeAppBar(
                 drawerState,
                 coroutineScope
-            ) }
+            ) },
+            bottomBar = {
+                HomeBottomMenu()
+            }
         ) {  }
     }
 }

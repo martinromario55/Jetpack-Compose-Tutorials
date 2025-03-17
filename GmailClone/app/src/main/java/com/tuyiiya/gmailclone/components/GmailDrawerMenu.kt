@@ -16,7 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tuyiiya.gmailclone.DrawerMenuData
+import com.tuyiiya.gmailclone.model.DrawerMenuData
 
 @Composable
 fun GmailDrawerMenu (
