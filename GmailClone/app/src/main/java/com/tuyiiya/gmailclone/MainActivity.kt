@@ -6,7 +6,9 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
@@ -22,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.tuyiiya.gmailclone.components.GmailDrawerMenu
 import com.tuyiiya.gmailclone.components.HomeAppBar
 import com.tuyiiya.gmailclone.components.HomeBottomMenu
+import com.tuyiiya.gmailclone.components.MailList
 import com.tuyiiya.gmailclone.ui.theme.GmailCloneTheme
 
 class MainActivity : ComponentActivity() {
@@ -63,7 +66,9 @@ fun GmailApp() {
             bottomBar = {
                 HomeBottomMenu()
             }
-        ) {  }
+        ) {
+            MailList(it)
+        }
     }
 }
 
