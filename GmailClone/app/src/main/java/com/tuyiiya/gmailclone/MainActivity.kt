@@ -22,6 +22,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.tuyiiya.gmailclone.components.GmailDrawerMenu
+import com.tuyiiya.gmailclone.components.GmailFab
 import com.tuyiiya.gmailclone.components.HomeAppBar
 import com.tuyiiya.gmailclone.components.HomeBottomMenu
 import com.tuyiiya.gmailclone.components.MailList
@@ -65,9 +66,10 @@ fun GmailApp() {
             ) },
             bottomBar = {
                 HomeBottomMenu()
-            }
+            },
+            floatingActionButton = { GmailFab(scrollState) }
         ) {
-            MailList(it)
+            MailList(it, scrollState)
         }
     }
 }
