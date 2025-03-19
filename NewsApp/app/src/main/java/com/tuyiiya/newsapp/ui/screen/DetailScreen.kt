@@ -21,22 +21,28 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.skydoves.landscapist.coil.CoilImage
 import com.tuyiiya.newsapp.MockData
 import com.tuyiiya.newsapp.MockData.getTimeAgo
 import com.tuyiiya.newsapp.NewsData
 import com.tuyiiya.newsapp.R
+import com.tuyiiya.newsapp.models.TopNewsArticle
 
 @Composable
 fun DetailScreen(
-    newsData: NewsData,
+    //newsData: NewsData,
+    article: TopNewsArticle,
     scrollState: ScrollState,
     navController: NavController
 ) {
@@ -48,7 +54,7 @@ fun DetailScreen(
         }
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth().verticalScroll(scrollState).padding(16.dp),
+            modifier = Modifier.fillMaxWidth().verticalScroll(scrollState).padding(it),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
@@ -56,9 +62,15 @@ fun DetailScreen(
                 fontWeight = FontWeight.SemiBold
             )
 
-            Image(
-                painter = painterResource(id = newsData.image),
-                contentDescription = ""
+//            Image(
+//                painter = painterResource(id = newsData.image),
+//                contentDescription = ""
+//            )
+            CoilImage(
+                imageModel = article.urlToImage,
+                contentScale = ContentScale.Crop,
+                error = ImageBitmap.imageResource(R.drawable.breaking_news),
+                placeHolder = ImageBitmap.imageResource(R.drawable.breaking_news)
             )
 
             Row(
@@ -66,15 +78,15 @@ fun DetailScreen(
                     .padding(8.dp)
             ) {
                 InfoWithIcon(
-                    Icons.Default.Edit, info = newsData.author
+                    Icons.Default.Edit, info = article.author?:"Not Availablee"
                 )
                 InfoWithIcon(
-                    Icons.Default.DateRange, info = MockData.stringToDate(newsData.publishedAt).getTimeAgo()
+                    Icons.Default.DateRange, info = MockData.stringToDate(article.publishedAt!!).getTimeAgo()
                 )
             }
 
-            Text(text = newsData.title, fontWeight = FontWeight.Bold)
-            Text(text = newsData.description, modifier = Modifier.padding(top = 16.dp))
+            Text(text = article.title?:"Not Available", fontWeight = FontWeight.Bold)
+            Text(text = article.description?:"Not Available", modifier = Modifier.padding(top = 16.dp))
         }
     }
 }
@@ -124,8 +136,7 @@ fun DetailTopAppBar(
 @Composable
 fun DetailScreenPreview() {
     DetailScreen(
-        NewsData(
-            6,
+        TopNewsArticle(
             author = "Michael Schneider",
             title = "‘The Masked Singer’ Reveals Identity of the Beach Ball: Here Are the Stars Under the Mask - Variety",
             description = "SPOILER ALERT: Do not read ahead if you have not watched “The Masked Singer” Season 6, Episode 8, “Giving Thanks,” which aired November 3 on Fox. Honey Boo Boo, we hardly knew you. Reality TV mother and daughter stars June Edith “Mama June” Shannon and Alana …",

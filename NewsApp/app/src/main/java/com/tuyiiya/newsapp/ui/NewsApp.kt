@@ -1,10 +1,15 @@
 package com.tuyiiya.newsapp.ui
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -16,6 +21,8 @@ import androidx.navigation.navArgument
 import com.tuyiiya.newsapp.BottomMenuScreen
 import com.tuyiiya.newsapp.MockData
 import com.tuyiiya.newsapp.components.BottomMenu
+import com.tuyiiya.newsapp.models.TopNewsArticle
+import com.tuyiiya.newsapp.network.NewsManager
 import com.tuyiiya.newsapp.ui.screen.Categories
 import com.tuyiiya.newsapp.ui.screen.DetailScreen
 import com.tuyiiya.newsapp.ui.screen.Sources
@@ -42,44 +49,77 @@ fun MainScreen(
     ) {
         Navigation(
             navController = navController,
-            scrollState = scrollState
+            scrollState = scrollState,
+            paddingValues = it
         )
     }
 }
 
 
 @Composable
-fun Navigation(navController: NavHostController, scrollState: ScrollState) {
+fun Navigation(
+    navController: NavHostController,
+    scrollState: ScrollState,
+    newsManager: NewsManager = NewsManager(),
+    paddingValues: PaddingValues
+) {
+    val articles = newsManager.newsResponse.value.articles ?: emptyList()
+    Log.d("News", "$articles")
 
     NavHost(
         navController = navController,
-        startDestination = "TopNews"
+        //startDestination = "TopNews",
+        startDestination = BottomMenuScreen.TopNews.route,
+        modifier = Modifier.padding(paddingValues = paddingValues)
     ) {
-        bottomNavigation(navController = navController)
+        bottomNavigation(navController = navController, articles, newsManager)
 
-        composable("TopNews") { TopNews(navController = navController) }
+        //composable("TopNews") { TopNews(navController = navController, articles) }
         composable(
-            "Detail/{newsId}",
-            arguments = listOf(navArgument("newsId") { type = NavType.IntType })
+            "Detail/{index}",
+            arguments = listOf(navArgument("index") { type = NavType.IntType })
         ) { navBackStackEntry ->
-            val id = navBackStackEntry.arguments?.getInt("newsId")
-            val newsData = MockData.getNews(id)
-            DetailScreen(newsData, scrollState, navController)
+            //val id = navBackStackEntry.arguments?.getInt("index")
+            val index = navBackStackEntry.arguments?.getInt("index")
+            //val newsData = MockData.getNews(id)
+            //DetailScreen(newsData, scrollState, navController)
+            index?.let {
+                val article = articles.getOrNull(index)
+
+                if (article != null) {
+                    DetailScreen(article, scrollState, navController)
+                } else {
+                    Text("Article not found")
+                }
+            }
         }
     }
 }
 
-fun NavGraphBuilder.bottomNavigation(navController: NavController) {
+fun NavGraphBuilder.bottomNavigation(
+    navController: NavController,
+    articles: List<TopNewsArticle>,
+    newsManager: NewsManager
+) {
      composable(
          BottomMenuScreen.TopNews.route
      ) {
-         TopNews(navController = navController)
+         if (articles.isEmpty()) {
+             Text("No articles available") // Prevent crashes when articles are missing
+         } else {
+             TopNews(navController = navController, articles)
+         }
      }
 
     composable(
         BottomMenuScreen.Categories.route
     ) {
-        Categories()
+        Categories(
+            newsManager = newsManager,
+            onFetchCategory = {
+                newsManager.onSelectedCategoryChanged(it)
+            }
+        )
     }
 
     composable(

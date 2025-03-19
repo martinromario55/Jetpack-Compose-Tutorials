@@ -63,4 +63,14 @@ dependencies {
 
     // Material Icons Extended (for Outlined, Rounded, Two-Tone, and Sharp)
     implementation(libs.androidx.material.icons.extended)
+
+    // Retrofit API
+    implementation(libs.retrofit)
+
+    // Moshi
+    implementation(libs.moshi.kotlin)
+    implementation(libs.converter.moshi)
+
+    // Skeleton
+    implementation(libs.landscapist.coil)
 }

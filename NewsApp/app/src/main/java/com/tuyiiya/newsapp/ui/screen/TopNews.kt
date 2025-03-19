@@ -20,21 +20,27 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.skydoves.landscapist.coil.CoilImage
 import com.tuyiiya.newsapp.MockData
 import com.tuyiiya.newsapp.MockData.getTimeAgo
 import com.tuyiiya.newsapp.NewsData
+import com.tuyiiya.newsapp.models.TopNewsArticle
 import com.tuyiiya.newsapp.ui.Navigation
+import com.tuyiiya.newsapp.R
 
 @Composable
 fun TopNews(
-    navController: NavController
+    navController: NavController,
+    articles: List<TopNewsArticle>
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -45,14 +51,25 @@ fun TopNews(
             fontWeight = FontWeight.SemiBold
         )
 
+//        LazyColumn {
+//            items(MockData.topNewsList) { newsData ->
+//                TopNewsItem(
+//                    newsData = newsData,
+//                    onNewsClick = {
+//                        navController.navigate("Detail/${newsData.id}")
+//                    }
+//                )
+//            }
+//        }
         LazyColumn {
-            items(MockData.topNewsList) { newsData ->
+            items(articles.size) { index ->
                 TopNewsItem(
-                    newsData = newsData,
+                    article = articles[index],
                     onNewsClick = {
-                        navController.navigate("Detail/${newsData.id}")
+                        navController.navigate("Detail/$index")
                     }
                 )
+
             }
         }
     }
@@ -60,7 +77,8 @@ fun TopNews(
 
 @Composable
 fun TopNewsItem(
-    newsData: NewsData,
+    //newsData: NewsData,
+    article: TopNewsArticle,
     onNewsClick: () -> Unit = {}
 ) {
     Box(
@@ -71,10 +89,16 @@ fun TopNewsItem(
                 onNewsClick()
             }
     ) {
-        Image(
-            painter = painterResource(id = newsData.image),
-            contentDescription = "",
-            contentScale = ContentScale.FillBounds
+//        Image(
+//            painter = painterResource(id = newsData.image),
+//            contentDescription = "",
+//            contentScale = ContentScale.FillBounds
+//        )
+        CoilImage(
+            imageModel = article.urlToImage,
+            contentScale = ContentScale.Crop,
+            error = ImageBitmap.imageResource(R.drawable.breaking_news),
+            placeHolder = ImageBitmap.imageResource(R.drawable.breaking_news)
         )
         Column(
             modifier = Modifier.wrapContentHeight()
@@ -82,7 +106,7 @@ fun TopNewsItem(
             verticalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = MockData.stringToDate(newsData.publishedAt).getTimeAgo(),
+                text = MockData.stringToDate(article.publishedAt!!).getTimeAgo(),
                 color = Color.White,
                 fontWeight = FontWeight.SemiBold
             )
@@ -90,7 +114,7 @@ fun TopNewsItem(
             Spacer(modifier = Modifier.height(80.dp))
 
             Text(
-                text = newsData.title,
+                text = article.title!!,
                 color = Color.White,
                 fontWeight = FontWeight.SemiBold
             )
@@ -98,8 +122,8 @@ fun TopNewsItem(
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun TopNewsPreview() {
-    TopNews(rememberNavController())
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun TopNewsPreview() {
+//    TopNews(rememberNavController())
+//}
