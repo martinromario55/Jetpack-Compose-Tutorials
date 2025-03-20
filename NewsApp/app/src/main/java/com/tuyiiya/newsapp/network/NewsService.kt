@@ -11,4 +11,25 @@ interface NewsService {
         @Query("country") country: String,
         @Query("apiKey") apiKey: String
     ): Call<TopNewsResponse>
+
+
+    @GET("top-headlines")
+    fun getArticlesByCategory(
+        @Query("category") category: String,
+        @Query("apiKey") apiKey: String
+    ): Call<TopNewsResponse>
+
+
+    @GET("everything")
+    fun getArticlesBySources(
+        @Query("sources") source: String,
+        @Query("apiKey") apiKey: String
+    ): Call<TopNewsResponse>
+
+
+    @GET("everything")
+    fun getArticles(
+        @Query("q") query: String,
+        @Query("apiKey") apiKey: String
+    ): Call<TopNewsResponse>
 }

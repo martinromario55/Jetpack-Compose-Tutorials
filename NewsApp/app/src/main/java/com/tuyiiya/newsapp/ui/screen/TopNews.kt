@@ -17,6 +17,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,20 +37,36 @@ import com.tuyiiya.newsapp.NewsData
 import com.tuyiiya.newsapp.models.TopNewsArticle
 import com.tuyiiya.newsapp.ui.Navigation
 import com.tuyiiya.newsapp.R
+import com.tuyiiya.newsapp.components.SearchBar
+import com.tuyiiya.newsapp.network.NewsManager
 
 @Composable
 fun TopNews(
     navController: NavController,
-    articles: List<TopNewsArticle>
+    articles: List<TopNewsArticle>,
+    query: MutableState<String>,
+    newsManager: NewsManager
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "Top News",
-            fontWeight = FontWeight.SemiBold
-        )
+//        Text(
+//            text = "Top News",
+//            fontWeight = FontWeight.SemiBold
+//        )
+        SearchBar(query = query, newsManager = newsManager)
+
+        val searchedText = query.value
+        val resultList = mutableListOf<TopNewsArticle>()
+
+        if (searchedText != "") {
+            resultList.addAll(
+                newsManager.searchedNewsResponse.value.articles?: articles
+            )
+        } else {
+            resultList.addAll(articles)
+        }
 
 //        LazyColumn {
 //            items(MockData.topNewsList) { newsData ->
@@ -62,9 +79,9 @@ fun TopNews(
 //            }
 //        }
         LazyColumn {
-            items(articles.size) { index ->
+            items(resultList.size) { index ->
                 TopNewsItem(
-                    article = articles[index],
+                    article = resultList[index],
                     onNewsClick = {
                         navController.navigate("Detail/$index")
                     }
@@ -105,19 +122,23 @@ fun TopNewsItem(
                 .padding(top = 16.dp, start = 16.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = MockData.stringToDate(article.publishedAt!!).getTimeAgo(),
-                color = Color.White,
-                fontWeight = FontWeight.SemiBold
-            )
+            article.publishedAt?.let {
+                Text(
+                    text = MockData.stringToDate(article.publishedAt).getTimeAgo(),
+                    color = Color.White,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
 
             Spacer(modifier = Modifier.height(80.dp))
 
-            Text(
-                text = article.title!!,
-                color = Color.White,
-                fontWeight = FontWeight.SemiBold
-            )
+            article.title?.let {
+                Text(
+                    text = article.title,
+                    color = Color.White,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
         }
     }
 }

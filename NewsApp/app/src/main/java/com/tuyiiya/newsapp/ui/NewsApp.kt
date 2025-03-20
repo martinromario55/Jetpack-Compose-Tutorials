@@ -63,33 +63,44 @@ fun Navigation(
     newsManager: NewsManager = NewsManager(),
     paddingValues: PaddingValues
 ) {
-    val articles = newsManager.newsResponse.value.articles ?: emptyList()
-    Log.d("News", "$articles")
+//    val articles = newsManager.newsResponse.value.articles ?: emptyList()
+    val articles = mutableListOf(TopNewsArticle())
+    articles.addAll(newsManager.newsResponse.value.articles ?: listOf(TopNewsArticle()))
+    //Log.d("News", "$articles")
 
-    NavHost(
-        navController = navController,
-        //startDestination = "TopNews",
-        startDestination = BottomMenuScreen.TopNews.route,
-        modifier = Modifier.padding(paddingValues = paddingValues)
-    ) {
-        bottomNavigation(navController = navController, articles, newsManager)
+    articles?.let {
+        NavHost(
+            navController = navController,
+            //startDestination = "TopNews",
+            startDestination = BottomMenuScreen.TopNews.route,
+            modifier = Modifier.padding(paddingValues = paddingValues)
+        ) {
+            bottomNavigation(navController = navController, articles, newsManager)
 
-        //composable("TopNews") { TopNews(navController = navController, articles) }
-        composable(
-            "Detail/{index}",
-            arguments = listOf(navArgument("index") { type = NavType.IntType })
-        ) { navBackStackEntry ->
-            //val id = navBackStackEntry.arguments?.getInt("index")
-            val index = navBackStackEntry.arguments?.getInt("index")
-            //val newsData = MockData.getNews(id)
-            //DetailScreen(newsData, scrollState, navController)
-            index?.let {
-                val article = articles.getOrNull(index)
+            //composable("TopNews") { TopNews(navController = navController, articles) }
+            composable(
+                "Detail/{index}",
+                arguments = listOf(navArgument("index") { type = NavType.IntType })
+            ) { navBackStackEntry ->
+                //val id = navBackStackEntry.arguments?.getInt("index")
+                val index = navBackStackEntry.arguments?.getInt("index")
+                //val newsData = MockData.getNews(id)
+                //DetailScreen(newsData, scrollState, navController)
+                index?.let {
+                    val article = articles[index]
 
-                if (article != null) {
+                    if (newsManager.query.value.isNotEmpty()) {
+                        articles.clear()
+                        articles.addAll(newsManager.searchedNewsResponse.value.articles ?: listOf( ))
+
+                    } else {
+                        articles.clear()
+                        articles.addAll(
+                            newsManager.newsResponse.value.articles ?: listOf()
+                        )
+                    }
+
                     DetailScreen(article, scrollState, navController)
-                } else {
-                    Text("Article not found")
                 }
             }
         }
@@ -107,17 +118,21 @@ fun NavGraphBuilder.bottomNavigation(
          if (articles.isEmpty()) {
              Text("No articles available") // Prevent crashes when articles are missing
          } else {
-             TopNews(navController = navController, articles)
+             TopNews(navController = navController, articles, newsManager.query, newsManager = newsManager)
          }
      }
 
     composable(
         BottomMenuScreen.Categories.route
     ) {
+        newsManager.getArticlesByCategory("business")
+        newsManager.getArticlesByCategory("business")
+
         Categories(
             newsManager = newsManager,
             onFetchCategory = {
                 newsManager.onSelectedCategoryChanged(it)
+                newsManager.getArticlesByCategory(it)
             }
         )
     }
@@ -125,6 +140,8 @@ fun NavGraphBuilder.bottomNavigation(
     composable(
         BottomMenuScreen.Sources.route
     ) {
-        Sources()
+        Sources(
+            newsManager = newsManager
+        )
     }
 }

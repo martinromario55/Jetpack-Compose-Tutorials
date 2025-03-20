@@ -73,4 +73,7 @@ dependencies {
 
     // Skeleton
     implementation(libs.landscapist.coil)
+
+    // Interceptor
+    implementation(libs.logging.interceptor)
 }
