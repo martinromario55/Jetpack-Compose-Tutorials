@@ -9,11 +9,15 @@ import androidx.compose.runtime.remember
 import com.tuyiiya.newsapp.models.ArticleCategory
 import com.tuyiiya.newsapp.models.TopNewsResponse
 import com.tuyiiya.newsapp.models.getArticleCategory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class NewsManager {
+class NewsManager(
+    private val service: NewsService
+) {
     private val _newsResponse = mutableStateOf(TopNewsResponse())
 
     val newsResponse: State<TopNewsResponse>
@@ -50,32 +54,33 @@ class NewsManager {
     }
 
 
-    private fun getArticles() {
-        val service = Api.retrofitService.getTopArticles("us", Api.API_KEY)
-
-        service.enqueue(object: Callback<TopNewsResponse> {
-            override fun onResponse(
-                call: Call<TopNewsResponse?>,
-                response: Response<TopNewsResponse?>
-            ) {
-                if (response.isSuccessful) {
-                    _newsResponse.value = response.body()!!
-
-                    Log.d("News", "${_newsResponse.value}")
-                } else {
-                    val errorBody = response.errorBody()?.string() ?: "Unknown error"
-                    Log.d("error", "Response Code: ${response.code()}, Error: $errorBody")
-                }
-            }
-
-            override fun onFailure(
-                call: Call<TopNewsResponse?>,
-                t: Throwable
-            ) {
-                Log.d("error", "${t.printStackTrace()}")
-            }
-
-        })
+    suspend fun getArticles(country: String): TopNewsResponse = withContext(Dispatchers.IO) {
+//        val service = Api.retrofitService.getTopArticles("us", Api.API_KEY)
+//
+//        service.enqueue(object: Callback<TopNewsResponse> {
+//            override fun onResponse(
+//                call: Call<TopNewsResponse?>,
+//                response: Response<TopNewsResponse?>
+//            ) {
+//                if (response.isSuccessful) {
+//                    _newsResponse.value = response.body()!!
+//
+//                    Log.d("News", "${_newsResponse.value}")
+//                } else {
+//                    val errorBody = response.errorBody()?.string() ?: "Unknown error"
+//                    Log.d("error", "Response Code: ${response.code()}, Error: $errorBody")
+//                }
+//            }
+//
+//            override fun onFailure(
+//                call: Call<TopNewsResponse?>,
+//                t: Throwable
+//            ) {
+//                Log.d("error", "${t.printStackTrace()}")
+//            }
+//
+//        })
+        service.getTopArticles(country = country, Api.API_KEY)
     }
 
 

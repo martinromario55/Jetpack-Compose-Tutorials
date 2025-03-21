@@ -7,17 +7,17 @@ import retrofit2.http.Query
 
 interface NewsService {
     @GET("top-headlines")
-    fun getTopArticles(
+    suspend fun getTopArticles(
         @Query("country") country: String,
         @Query("apiKey") apiKey: String
-    ): Call<TopNewsResponse>
+    ): TopNewsResponse
 
 
     @GET("top-headlines")
-    fun getArticlesByCategory(
+    suspend fun getArticlesByCategory(
         @Query("category") category: String,
         @Query("apiKey") apiKey: String
-    ): Call<TopNewsResponse>
+    ): TopNewsResponse
 
 
     @GET("everything")
