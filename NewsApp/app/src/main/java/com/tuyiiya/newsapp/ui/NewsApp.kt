@@ -9,6 +9,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -22,25 +25,36 @@ import com.tuyiiya.newsapp.BottomMenuScreen
 import com.tuyiiya.newsapp.MockData
 import com.tuyiiya.newsapp.components.BottomMenu
 import com.tuyiiya.newsapp.models.TopNewsArticle
+import com.tuyiiya.newsapp.network.Api
 import com.tuyiiya.newsapp.network.NewsManager
 import com.tuyiiya.newsapp.ui.screen.Categories
 import com.tuyiiya.newsapp.ui.screen.DetailScreen
 import com.tuyiiya.newsapp.ui.screen.Sources
 import com.tuyiiya.newsapp.ui.screen.TopNews
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+
 
 @Composable
-fun NewsApp() {
+fun NewsApp(
+    mainViewModel: MainViewModel
+) {
     val scrollState = rememberScrollState()
     val navController = rememberNavController()
 
-    MainScreen(navController = navController, scrollState = scrollState)
+    MainScreen(
+        navController = navController,
+        scrollState = scrollState,
+        mainViewModel = mainViewModel
+    )
 }
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun MainScreen(
     navController: NavHostController,
-    scrollState: ScrollState
+    scrollState: ScrollState,
+    mainViewModel: MainViewModel
 ){
     Scaffold(
         bottomBar = {
@@ -50,7 +64,8 @@ fun MainScreen(
         Navigation(
             navController = navController,
             scrollState = scrollState,
-            paddingValues = it
+            paddingValues = it,
+            viewModel = mainViewModel
         )
     }
 }
@@ -60,12 +75,20 @@ fun MainScreen(
 fun Navigation(
     navController: NavHostController,
     scrollState: ScrollState,
-    newsManager: NewsManager = NewsManager(),
-    paddingValues: PaddingValues
+    newsManager: NewsManager = NewsManager(Api.retrofitService),
+    paddingValues: PaddingValues,
+    viewModel: MainViewModel
 ) {
 //    val articles = newsManager.newsResponse.value.articles ?: emptyList()
     val articles = mutableListOf(TopNewsArticle())
-    articles.addAll(newsManager.newsResponse.value.articles ?: listOf(TopNewsArticle()))
+
+    val topArticles = viewModel.newsResponse.collectAsState().value.articles
+
+    val loading by viewModel.isLoading.collectAsState()
+    val error by viewModel.isError.collectAsState()
+
+    //articles.addAll(newsManager.newsResponse.value.articles ?: listOf(TopNewsArticle()))
+    articles.addAll(topArticles ?: listOf())
     //Log.d("News", "$articles")
 
     articles?.let {
@@ -75,7 +98,19 @@ fun Navigation(
             startDestination = BottomMenuScreen.TopNews.route,
             modifier = Modifier.padding(paddingValues = paddingValues)
         ) {
-            bottomNavigation(navController = navController, articles, newsManager)
+            val queryState = mutableStateOf(viewModel.query.value)
+            val isLoading = mutableStateOf(loading)
+            val isError = mutableStateOf(error)
+
+            bottomNavigation(
+                navController = navController,
+                articles,
+                //newsManager,
+                query = queryState,
+                viewModel,
+                isLoading = isLoading,
+                isError = isError
+            )
 
             //composable("TopNews") { TopNews(navController = navController, articles) }
             composable(
@@ -89,14 +124,15 @@ fun Navigation(
                 index?.let {
                     val article = articles[index]
 
-                    if (newsManager.query.value.isNotEmpty()) {
+                    if (queryState.value != "") {
                         articles.clear()
-                        articles.addAll(newsManager.searchedNewsResponse.value.articles ?: listOf( ))
+                        articles.addAll(viewModel.searchedNewsResponse.value.articles ?: listOf())
 
                     } else {
                         articles.clear()
                         articles.addAll(
-                            newsManager.newsResponse.value.articles ?: listOf()
+                            //newsManager.newsResponse.value.articles ?: listOf()
+                            viewModel.newsResponse.value.articles ?: listOf()
                         )
                     }
 
@@ -110,7 +146,11 @@ fun Navigation(
 fun NavGraphBuilder.bottomNavigation(
     navController: NavController,
     articles: List<TopNewsArticle>,
-    newsManager: NewsManager
+    //newsManager: NewsManager,
+    query: MutableState<String>,
+    viewModel: MainViewModel,
+    isLoading: MutableState<Boolean>,
+    isError: MutableState<Boolean>
 ) {
      composable(
          BottomMenuScreen.TopNews.route
@@ -118,22 +158,36 @@ fun NavGraphBuilder.bottomNavigation(
          if (articles.isEmpty()) {
              Text("No articles available") // Prevent crashes when articles are missing
          } else {
-             TopNews(navController = navController, articles, newsManager.query, newsManager = newsManager)
+             TopNews(
+                 navController = navController,
+                 articles,
+                 query,
+                 viewModel = viewModel,
+                 isLoading = isLoading,
+                 isError = isError
+             )
          }
      }
 
     composable(
         BottomMenuScreen.Categories.route
     ) {
-        newsManager.getArticlesByCategory("business")
-        newsManager.getArticlesByCategory("business")
+        //newsManager.getArticlesByCategory("business")
+        //newsManager.getArticlesByCategory("business")
+
+        viewModel.getArticlesByCategory("business")
+
+        viewModel.onSelectedCategoryChanged("business")
 
         Categories(
-            newsManager = newsManager,
+            // newsManager = newsManager,
+            viewModel = viewModel,
             onFetchCategory = {
-                newsManager.onSelectedCategoryChanged(it)
-                newsManager.getArticlesByCategory(it)
-            }
+                viewModel.onSelectedCategoryChanged(it)
+                viewModel.getArticlesByCategory(it)
+            },
+            isLoading = isLoading,
+            isError = isError
         )
     }
 
@@ -141,7 +195,10 @@ fun NavGraphBuilder.bottomNavigation(
         BottomMenuScreen.Sources.route
     ) {
         Sources(
-            newsManager = newsManager
+            //newsManager = newsManager
+            viewModel = viewModel,
+            isLoading = isLoading,
+            isError = isError
         )
     }
 }

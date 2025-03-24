@@ -27,11 +27,11 @@ class NewsManager(
 
     val sourceName = mutableStateOf("abc-news")
 
-    private val _getArticleByCategory = mutableStateOf(TopNewsResponse())
-    val getArticleByCategory: MutableState<TopNewsResponse>
-        @Composable get() = remember {
-            _getArticleByCategory
-        }
+//    private val _getArticleByCategory = mutableStateOf(TopNewsResponse())
+//    val getArticleByCategory: MutableState<TopNewsResponse>
+//        @Composable get() = remember {
+//            _getArticleByCategory
+//        }
 
     private val _getArticleBySource = mutableStateOf(TopNewsResponse())
     val getArticleBySource: MutableState<TopNewsResponse>
@@ -49,125 +49,28 @@ class NewsManager(
             _searchedNewsResponse
         }
 
-    init {
-        getArticles()
-    }
+//    init {
+//        getArticles()
+//    }
 
 
     suspend fun getArticles(country: String): TopNewsResponse = withContext(Dispatchers.IO) {
-//        val service = Api.retrofitService.getTopArticles("us", Api.API_KEY)
-//
-//        service.enqueue(object: Callback<TopNewsResponse> {
-//            override fun onResponse(
-//                call: Call<TopNewsResponse?>,
-//                response: Response<TopNewsResponse?>
-//            ) {
-//                if (response.isSuccessful) {
-//                    _newsResponse.value = response.body()!!
-//
-//                    Log.d("News", "${_newsResponse.value}")
-//                } else {
-//                    val errorBody = response.errorBody()?.string() ?: "Unknown error"
-//                    Log.d("error", "Response Code: ${response.code()}, Error: $errorBody")
-//                }
-//            }
-//
-//            override fun onFailure(
-//                call: Call<TopNewsResponse?>,
-//                t: Throwable
-//            ) {
-//                Log.d("error", "${t.printStackTrace()}")
-//            }
-//
-//        })
         service.getTopArticles(country = country, Api.API_KEY)
     }
 
 
-    fun getArticlesByCategory(category: String) {
-        val service = Api.retrofitService.getArticlesByCategory(category, Api.API_KEY)
-
-        service.enqueue(object: Callback<TopNewsResponse> {
-            override fun onResponse(
-                call: Call<TopNewsResponse?>,
-                response: Response<TopNewsResponse?>
-            ) {
-                if (response.isSuccessful) {
-                    _getArticleByCategory.value = response.body()!!
-
-                    Log.d("Category", "${_getArticleByCategory.value}")
-                } else {
-                    val errorBody = response.errorBody()?.string() ?: "Unknown error"
-                    Log.d("error", "Response Code: ${response.code()}, Error: $errorBody")
-                }
-            }
-
-            override fun onFailure(
-                call: Call<TopNewsResponse?>,
-                t: Throwable
-            ) {
-                Log.d("error", "${t.printStackTrace()}")
-            }
-
-        })
+    suspend fun getArticlesByCategory(category: String): TopNewsResponse = withContext(Dispatchers.IO) {
+        service.getArticlesByCategory(category = category, Api.API_KEY)
     }
 
 
-    fun getArticlesBySource() {
-        val service = Api.retrofitService.getArticlesBySources(sourceName.value, Api.API_KEY)
-
-        service.enqueue(object: Callback<TopNewsResponse> {
-            override fun onResponse(
-                call: Call<TopNewsResponse?>,
-                response: Response<TopNewsResponse?>
-            ) {
-                if (response.isSuccessful) {
-                    _getArticleBySource.value = response.body()!!
-
-                    Log.d("Source", "${_getArticleBySource.value}")
-                } else {
-                    val errorBody = response.errorBody()?.string() ?: "Unknown error"
-                    Log.d("error", "Response Code: ${response.code()}, Error: $errorBody")
-                }
-            }
-
-            override fun onFailure(
-                call: Call<TopNewsResponse?>,
-                t: Throwable
-            ) {
-                Log.d("error", "${t.printStackTrace()}")
-            }
-
-        })
+    suspend fun getArticlesBySource(source: String): TopNewsResponse = withContext(Dispatchers.IO) {
+        service.getArticlesBySources(source, Api.API_KEY)
     }
 
 
-    fun getSearchedArticles(query: String) {
-        val service = Api.retrofitService.getArticles(query, Api.API_KEY)
-
-        service.enqueue(object: Callback<TopNewsResponse> {
-            override fun onResponse(
-                call: Call<TopNewsResponse?>,
-                response: Response<TopNewsResponse?>
-            ) {
-                if (response.isSuccessful) {
-                    _searchedNewsResponse.value = response.body()!!
-
-                    Log.d("Search", "${_searchedNewsResponse.value}")
-                } else {
-                    val errorBody = response.errorBody()?.string() ?: "Unknown error"
-                    Log.d("searchError", "Response Code: ${response.code()}, Error: $errorBody")
-                }
-            }
-
-            override fun onFailure(
-                call: Call<TopNewsResponse?>,
-                t: Throwable
-            ) {
-                Log.d("searchError", "${t.printStackTrace()}")
-            }
-
-        })
+    suspend fun getSearchedArticles(query: String): TopNewsResponse = withContext(Dispatchers.IO) {
+        service.getArticles(query, Api.API_KEY)
     }
 
     fun onSelectedCategoryChanged(category: String) {

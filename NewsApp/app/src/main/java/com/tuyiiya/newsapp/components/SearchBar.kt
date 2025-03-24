@@ -29,12 +29,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.tuyiiya.newsapp.network.Api
 import com.tuyiiya.newsapp.network.NewsManager
+import com.tuyiiya.newsapp.ui.MainViewModel
 
 @Composable
 fun SearchBar(
     query: MutableState<String>,
-    newsManager: NewsManager
+    //newsManager: NewsManager
+    viewModel: MainViewModel
 ) {
     val localFocusManager = LocalFocusManager.current
 
@@ -82,7 +86,7 @@ fun SearchBar(
             keyboardActions = KeyboardActions(
                 onSearch = {
                     if (query.value != "") {
-                        newsManager.getSearchedArticles(query.value)
+                        viewModel.getSearchedArticles(query.value)
                     }
                     localFocusManager.clearFocus()
                 }
@@ -103,5 +107,5 @@ fun SearchBar(
 @Preview(showBackground = true)
 @Composable
 fun SearchBarPreview() {
-    SearchBar(query = mutableStateOf(""), newsManager = NewsManager())
+    SearchBar(query = mutableStateOf(""), viewModel())
 }

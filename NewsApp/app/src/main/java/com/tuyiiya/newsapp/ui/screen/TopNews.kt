@@ -18,6 +18,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,15 +38,21 @@ import com.tuyiiya.newsapp.NewsData
 import com.tuyiiya.newsapp.models.TopNewsArticle
 import com.tuyiiya.newsapp.ui.Navigation
 import com.tuyiiya.newsapp.R
+import com.tuyiiya.newsapp.components.ErrorUI
+import com.tuyiiya.newsapp.components.LoadingUI
 import com.tuyiiya.newsapp.components.SearchBar
 import com.tuyiiya.newsapp.network.NewsManager
+import com.tuyiiya.newsapp.ui.MainViewModel
 
 @Composable
 fun TopNews(
     navController: NavController,
     articles: List<TopNewsArticle>,
     query: MutableState<String>,
-    newsManager: NewsManager
+    //newsManager: NewsManager
+    viewModel: MainViewModel,
+    isLoading: MutableState<Boolean>,
+    isError: MutableState<Boolean>
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -55,14 +62,14 @@ fun TopNews(
 //            text = "Top News",
 //            fontWeight = FontWeight.SemiBold
 //        )
-        SearchBar(query = query, newsManager = newsManager)
+        SearchBar(query = query, viewModel = viewModel)
 
         val searchedText = query.value
         val resultList = mutableListOf<TopNewsArticle>()
 
         if (searchedText != "") {
             resultList.addAll(
-                newsManager.searchedNewsResponse.value.articles?: articles
+                viewModel.searchedNewsResponse.collectAsState().value.articles?: articles
             )
         } else {
             resultList.addAll(articles)
@@ -78,15 +85,22 @@ fun TopNews(
 //                )
 //            }
 //        }
-        LazyColumn {
-            items(resultList.size) { index ->
-                TopNewsItem(
-                    article = resultList[index],
-                    onNewsClick = {
-                        navController.navigate("Detail/$index")
-                    }
-                )
 
+        when {
+            isLoading.value -> LoadingUI()
+            isError.value -> ErrorUI()
+            else -> {
+                LazyColumn {
+                    items(resultList.size) { index ->
+                        TopNewsItem(
+                            article = resultList[index],
+                            onNewsClick = {
+                                navController.navigate("Detail/$index")
+                            }
+                        )
+
+                    }
+                }
             }
         }
     }

@@ -23,6 +23,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
@@ -41,12 +43,18 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import com.tuyiiya.newsapp.models.TopNewsArticle
 import com.tuyiiya.newsapp.R
+import com.tuyiiya.newsapp.components.ErrorUI
+import com.tuyiiya.newsapp.components.LoadingUI
+import com.tuyiiya.newsapp.ui.MainViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Sources(
-    newsManager: NewsManager
+    //newsManager: NewsManager
+    viewModel: MainViewModel,
+    isLoading: MutableState<Boolean>,
+    isError: MutableState<Boolean>
 ) {
     val items = listOf(
         "TechCrunch" to "techcrunch",
@@ -62,7 +70,7 @@ fun Sources(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = "${newsManager.sourceName.value} Source")
+                    Text(text = "${viewModel.sourceName.collectAsState().value} Source")
                 },
                 actions = {
                     var menuExpanded by remember { mutableStateOf(false) }
@@ -87,7 +95,8 @@ fun Sources(
                             items.forEach {
                                 DropdownMenuItem(
                                     onClick = {
-                                        newsManager.sourceName.value = it.second
+                                        viewModel.sourceName.value = it.second
+                                        viewModel.getArticleBySource()
                                         menuExpanded = false
                                     },
                                     text = { Text(it.first) }
@@ -99,9 +108,15 @@ fun Sources(
             )
         }
     ) {
-        newsManager.getArticlesBySource()
-        val articles = newsManager.getArticleBySource.value
-        SourceContent(articles = articles.articles?: listOf())
+        when {
+            isLoading.value -> LoadingUI()
+            isError.value -> ErrorUI()
+            else -> {
+                viewModel.getArticleBySource()
+                val articles = viewModel.getArticleBySource.collectAsState().value
+                SourceContent(articles = articles.articles?: listOf())
+            }
+        }
     }
 }
 
